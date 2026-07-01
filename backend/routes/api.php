@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\TemplateAbsensiController;
 use App\Http\Controllers\Api\AbsensiPublikController;
 use App\Http\Controllers\Api\SuratController;
 use App\Http\Controllers\Api\DokumentasiController;
+use App\Http\Controllers\Api\KeuanganController;
 use App\Models\Role;
 
 // Public routes
@@ -37,6 +38,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/agendas/{id}/dokumentasi', [DokumentasiController::class, 'index']);
     Route::post('/agendas/{id}/dokumentasi', [DokumentasiController::class, 'store']);
     Route::delete('/dokumentasi/{id}', [DokumentasiController::class, 'destroy']);
+
+    // Keuangan (Finance & OCR) Routes
+    Route::get('/keuangan/struk', [KeuanganController::class, 'index']);
+    Route::post('/keuangan/struk', [KeuanganController::class, 'store']);
+    Route::put('/keuangan/struk/{id}', [KeuanganController::class, 'update']);
+    Route::delete('/keuangan/struk/{id}', [KeuanganController::class, 'destroy']);
+    Route::get('/keuangan/summary', [KeuanganController::class, 'summary']);
+    Route::get('/keuangan/export-pdf', [KeuanganController::class, 'exportPdf']);
 
     // Surat-Menyurat (Mail Management) Routes
     Route::get('/surat/templates', [SuratController::class, 'indexTemplate']);
