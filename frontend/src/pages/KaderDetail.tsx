@@ -20,7 +20,9 @@ import {
   CheckCircle,
   FileText,
   Clock,
-  GraduationCap
+  GraduationCap,
+  Star,
+  Edit3
 } from 'lucide-react';
 
 interface RiwayatPendidikan {
@@ -40,6 +42,23 @@ interface AnggotaKeluarga {
   riwayat_pendidikans?: RiwayatPendidikan[];
 }
 
+interface KaderisasiRecord {
+  id: number;
+  jenjang: string;
+  tahun_lulus: number;
+  predikat: string | null;
+  sertifikat_file: string | null;
+}
+
+interface KaderRating {
+  id: number;
+  kepemimpinan: number;
+  loyalitas: number;
+  komunikasi: number;
+  kreativitas: number;
+  catatan: string | null;
+}
+
 interface Kader {
   id: number;
   nama_lengkap: string;
@@ -51,6 +70,8 @@ interface Kader {
   email: string | null;
   status_keanggotaan: string;
   keluargas?: AnggotaKeluarga[];
+  kaderisasi_records?: KaderisasiRecord[];
+  rating?: KaderRating;
 }
 
 const KaderDetail: React.FC = () => {
@@ -59,7 +80,7 @@ const KaderDetail: React.FC = () => {
   const navigate = useNavigate();
 
   const [kader, setKader] = useState<Kader | null>(null);
-  const [activeTab, setActiveTab] = useState<'profil' | 'keluarga'>('profil');
+  const [activeTab, setActiveTab] = useState<'profil' | 'keluarga' | 'kaderisasi'>('profil');
 
   // Edit Kader Form State
   const [namaLengkap, setNamaLengkap] = useState('');
@@ -86,6 +107,22 @@ const KaderDetail: React.FC = () => {
   const [actualTahunMasuk, setActualTahunMasuk] = useState(2026);
   const [updatingPendidikan, setUpdatingPendidikan] = useState(false);
 
+  // Add Kaderisasi Form State
+  const [isKaderisasiModalOpen, setIsKaderisasiModalOpen] = useState(false);
+  const [jenjang, setJenjang] = useState('MAPABA');
+  const [tahunLulus, setTahunLulus] = useState(new Date().getFullYear());
+  const [predikat, setPredikat] = useState('');
+  const [savingKaderisasi, setSavingKaderisasi] = useState(false);
+
+  // Rating Form State
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [kepemimpinan, setKepemimpinan] = useState(3);
+  const [loyalitas, setLoyalitas] = useState(3);
+  const [komunikasi, setKomunikasi] = useState(3);
+  const [kreativitas, setKreativitas] = useState(3);
+  const [catatanRating, setCatatanRating] = useState('');
+  const [savingRating, setSavingRating] = useState(false);
+
   const fetchKaderDetail = async () => {
     try {
       const response = await api.get(`/kader/${id}`);
@@ -101,6 +138,15 @@ const KaderDetail: React.FC = () => {
       setNoHp(data.no_hp || '');
       setEmail(data.email || '');
       setStatusKeanggotaan(data.status_keanggotaan);
+
+      // Pre-fill rating form
+      if (data.rating) {
+        setKepemimpinan(data.rating.kepemimpinan);
+        setLoyalitas(data.rating.loyalitas);
+        setKomunikasi(data.rating.komunikasi);
+        setKreativitas(data.rating.kreativitas);
+        setCatatanRating(data.rating.catatan || '');
+      }
     } catch (err) {
       console.error('Error fetching kader details:', err);
     }
@@ -190,6 +236,59 @@ const KaderDetail: React.FC = () => {
       alert(err.response?.data?.message || 'Gagal menyimpan aktualisasi.');
     } finally {
       setUpdatingPendidikan(false);
+    }
+  };
+
+  const handleAddKaderisasi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingKaderisasi(true);
+    try {
+      await api.post(`/kader/${id}/kaderisasi`, {
+        jenjang,
+        tahun_lulus: tahunLulus,
+        predikat
+      });
+      setIsKaderisasiModalOpen(false);
+      setJenjang('MAPABA');
+      setTahunLulus(new Date().getFullYear());
+      setPredikat('');
+      fetchKaderDetail();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menyimpan riwayat kaderisasi.');
+    } finally {
+      setSavingKaderisasi(false);
+    }
+  };
+
+  const handleDeleteKaderisasi = async (recordId: number) => {
+    if (window.confirm('Hapus riwayat kaderisasi ini?')) {
+      try {
+        await api.delete(`/kaderisasi/${recordId}`);
+        fetchKaderDetail();
+      } catch (err) {
+        console.error('Error deleting kaderisasi:', err);
+      }
+    }
+  };
+
+  const handleUpdateRating = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingRating(true);
+    try {
+      await api.put(`/kader/${id}/rating`, {
+        kepemimpinan,
+        loyalitas,
+        komunikasi,
+        kreativitas,
+        catatan: catatanRating
+      });
+      setIsRatingModalOpen(false);
+      alert('Rapor berhasil diperbarui.');
+      fetchKaderDetail();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal memperbarui rapor kader.');
+    } finally {
+      setSavingRating(false);
     }
   };
 
@@ -307,9 +406,17 @@ const KaderDetail: React.FC = () => {
               >
                 Data Keluarga ({kader.keluargas?.length || 0})
               </button>
+              <button
+                onClick={() => setActiveTab('kaderisasi')}
+                className={`pb-2 border-b-2 transition-all ${
+                  activeTab === 'kaderisasi' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Kaderisasi & Rapor
+              </button>
             </div>
 
-            {activeTab === 'profil' ? (
+            {activeTab === 'profil' && (
               <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-2xl">
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Nama Lengkap *</label>
@@ -409,7 +516,9 @@ const KaderDetail: React.FC = () => {
                   {updatingProfile ? 'Memproses...' : 'Simpan Perubahan'}
                 </button>
               </form>
-            ) : (
+            )}
+
+            {activeTab === 'keluarga' && (
               <div className="space-y-6">
                 <header className="flex justify-between items-center">
                   <h3 className="text-md font-bold text-slate-300">Hubungan Keluarga Kader</h3>
@@ -495,6 +604,97 @@ const KaderDetail: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {activeTab === 'kaderisasi' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Riwayat Kaderisasi */}
+                <div className="space-y-6">
+                  <header className="flex justify-between items-center">
+                    <h3 className="text-md font-bold text-slate-300">Riwayat Kaderisasi Formal</h3>
+                    <button
+                      onClick={() => setIsKaderisasiModalOpen(true)}
+                      className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-colors"
+                    >
+                      <Plus size={14} />
+                      Tambah Riwayat
+                    </button>
+                  </header>
+
+                  <div className="space-y-4">
+                    {kader.kaderisasi_records?.map(rec => (
+                      <div key={rec.id} className="bg-slate-950 border border-slate-850 p-4 rounded-2xl relative flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 bg-indigo-500/10 rounded-full flex items-center justify-center text-indigo-400 font-bold text-xs border border-indigo-500/20">
+                            {rec.jenjang}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-white">{rec.jenjang}</h4>
+                            <p className="text-xs text-slate-400">Lulus Tahun: {rec.tahun_lulus} {rec.predikat && `• Predikat: ${rec.predikat}`}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteKaderisasi(rec.id)}
+                          className="p-1.5 hover:bg-slate-900 rounded-lg text-red-400 hover:text-red-300 transition-colors"
+                          title="Hapus Riwayat"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                    {kader.kaderisasi_records?.length === 0 && (
+                      <div className="text-center py-8 border border-dashed border-slate-800 rounded-2xl text-slate-500 text-sm">
+                        Belum ada riwayat kaderisasi yang tercatat.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Rapor Kader */}
+                <div className="space-y-6">
+                  <header className="flex justify-between items-center">
+                    <h3 className="text-md font-bold text-slate-300">Rapor Penilaian Kader</h3>
+                    <button
+                      onClick={() => setIsRatingModalOpen(true)}
+                      className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 transition-colors"
+                    >
+                      <Edit3 size={14} />
+                      {kader.rating ? 'Perbarui Rapor' : 'Beri Penilaian'}
+                    </button>
+                  </header>
+
+                  {kader.rating ? (
+                    <div className="bg-slate-950 border border-slate-850 p-6 rounded-2xl space-y-5">
+                      {[
+                        { label: 'Kepemimpinan', value: kader.rating.kepemimpinan, color: 'bg-blue-500' },
+                        { label: 'Loyalitas', value: kader.rating.loyalitas, color: 'bg-green-500' },
+                        { label: 'Komunikasi', value: kader.rating.komunikasi, color: 'bg-purple-500' },
+                        { label: 'Kreativitas', value: kader.rating.kreativitas, color: 'bg-yellow-500' }
+                      ].map(item => (
+                        <div key={item.label} className="space-y-1">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="text-slate-400">{item.label}</span>
+                            <span className="text-white">{item.value} / 5</span>
+                          </div>
+                          <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+                            <div className={`h-full ${item.color} rounded-full`} style={{ width: `${(item.value / 5) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                      {kader.rating.catatan && (
+                        <div className="mt-4 pt-4 border-t border-slate-800">
+                          <h5 className="text-[10px] font-bold text-slate-500 uppercase mb-1">Catatan Tambahan</h5>
+                          <p className="text-xs text-slate-300 italic">"{kader.rating.catatan}"</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 border border-dashed border-slate-800 rounded-2xl text-slate-500 text-sm">
+                      Kader ini belum memiliki rapor penilaian.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -553,7 +753,7 @@ const KaderDetail: React.FC = () => {
                   value={relTanggalLahir}
                   onChange={(e) => setRelTanggalLahir(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2 text-sm text-white"
-                  required={relTipeHubungan === 'anak'} // Date of birth is required for children to run estimator logic
+                  required={relTipeHubungan === 'anak'}
                 />
               </div>
 
@@ -611,6 +811,129 @@ const KaderDetail: React.FC = () => {
                 </button>
                 <button type="submit" disabled={updatingPendidikan} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg shadow-indigo-500/25">
                   {updatingPendidikan ? 'Menyimpan...' : 'Simpan & Aktualkan'}
+                </button>
+              </footer>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Kaderisasi Modal */}
+      {isKaderisasiModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <header className="p-6 border-b border-slate-800 flex justify-between items-center">
+              <h2 className="text-lg font-bold">Catat Riwayat Kaderisasi</h2>
+              <button onClick={() => setIsKaderisasiModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </header>
+
+            <form onSubmit={handleAddKaderisasi} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Jenjang Kaderisasi</label>
+                  <select
+                    value={jenjang}
+                    onChange={(e) => setJenjang(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-sm"
+                  >
+                    <option value="MAPABA">MAPABA</option>
+                    <option value="PKD">PKD</option>
+                    <option value="PKL">PKL</option>
+                    <option value="PKN">PKN</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tahun Lulus *</label>
+                  <input
+                    type="number"
+                    value={tahunLulus}
+                    onChange={(e) => setTahunLulus(parseInt(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2 text-sm text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Predikat / Nilai (Opsional)</label>
+                <input
+                  type="text"
+                  value={predikat}
+                  onChange={(e) => setPredikat(e.target.value)}
+                  placeholder="Contoh: Lulus Terbaik"
+                  className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2 text-sm text-white"
+                />
+              </div>
+
+              <footer className="pt-4 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsKaderisasiModalOpen(false)} className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-semibold">
+                  Batal
+                </button>
+                <button type="submit" disabled={savingKaderisasi} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg shadow-indigo-500/25">
+                  {savingKaderisasi ? 'Menyimpan...' : 'Catat Riwayat'}
+                </button>
+              </footer>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Update Rating Modal */}
+      {isRatingModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden my-8">
+            <header className="p-6 border-b border-slate-800 flex justify-between items-center">
+              <h2 className="text-lg font-bold">Rapor Penilaian Kader</h2>
+              <button onClick={() => setIsRatingModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </header>
+
+            <form onSubmit={handleUpdateRating} className="p-6 space-y-5">
+              {[
+                { state: kepemimpinan, setter: setKepemimpinan, label: 'Kepemimpinan' },
+                { state: loyalitas, setter: setLoyalitas, label: 'Loyalitas / Komitmen' },
+                { state: komunikasi, setter: setKomunikasi, label: 'Kecakapan Komunikasi' },
+                { state: kreativitas, setter: setKreativitas, label: 'Kreativitas & Inovasi' }
+              ].map((item, idx) => (
+                <div key={idx}>
+                  <div className="flex justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-400 uppercase">{item.label}</label>
+                    <span className="text-xs font-bold text-indigo-400">{item.state} / 5</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1" max="5" step="1"
+                    value={item.state}
+                    onChange={(e) => item.setter(parseInt(e.target.value))}
+                    className="w-full accent-indigo-500"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-500 px-1 mt-0.5">
+                    <span>Kurang</span>
+                    <span>Cukup</span>
+                    <span>Baik</span>
+                    <span>Sangat Baik</span>
+                    <span>Sempurna</span>
+                  </div>
+                </div>
+              ))}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Catatan Tambahan</label>
+                <textarea
+                  value={catatanRating}
+                  onChange={(e) => setCatatanRating(e.target.value)}
+                  placeholder="Tambahkan evaluasi deskriptif..."
+                  className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 py-2 text-sm text-white h-20 resize-none"
+                />
+              </div>
+
+              <footer className="pt-4 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsRatingModalOpen(false)} className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-semibold">
+                  Batal
+                </button>
+                <button type="submit" disabled={savingRating} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-lg shadow-indigo-500/25">
+                  {savingRating ? 'Menyimpan...' : 'Simpan Rapor'}
                 </button>
               </footer>
             </form>

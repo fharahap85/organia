@@ -79,6 +79,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/kader/{id}/keluarga', [KaderController::class, 'storeKeluarga']);
     Route::delete('/keluarga/{id}', [KaderController::class, 'destroyKeluarga']);
     Route::put('/pendidikan/{id}', [KaderController::class, 'updatePendidikan']);
+    Route::post('/kader/{id}/kaderisasi', [KaderController::class, 'storeKaderisasi']);
+    Route::delete('/kaderisasi/{id}', [KaderController::class, 'destroyKaderisasi']);
+    Route::put('/kader/{id}/rating', [KaderController::class, 'updateRating']);
 
     // Superadmin specific routes
     Route::middleware('role:Superadmin')->group(function () {

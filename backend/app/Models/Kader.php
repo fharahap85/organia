@@ -37,4 +37,14 @@ class Kader extends Model
     {
         return $this->hasMany(AnggotaKeluarga::class, 'kader_id');
     }
+
+    public function kaderisasiRecords()
+    {
+        return $this->hasMany(KaderisasiRecord::class, 'kader_id')->orderBy('tahun_lulus', 'asc');
+    }
+
+    public function rating()
+    {
+        return $this->hasOne(KaderRating::class, 'kader_id');
+    }
 }
