@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained('roles')->onDelete('restrict');
             $table->foreignId('periode_id')->nullable()->constrained('periode_kepengurusans')->onDelete('set null');
             $table->string('status')->default('active'); // active, inactive
+            $table->string('signature_path')->nullable(); // path to signature image
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->rememberToken();

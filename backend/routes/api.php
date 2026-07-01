@@ -10,12 +10,14 @@ use App\Http\Controllers\Api\StrukturController;
 use App\Http\Controllers\Api\AgendaController;
 use App\Http\Controllers\Api\TemplateAbsensiController;
 use App\Http\Controllers\Api\AbsensiPublikController;
+use App\Http\Controllers\Api\SuratController;
 use App\Models\Role;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/public/agenda/{uuid_qr}', [AbsensiPublikController::class, 'getAgendaByUuid']);
 Route::post('/public/agenda/{uuid_qr}/absen', [AbsensiPublikController::class, 'submitAbsensi']);
+Route::get('/public/verifikasi-surat/{uuid_verifikasi}', [SuratController::class, 'verifikasiSurat']);
 
 // Protected routes (requires Sanctum token)
 Route::middleware('auth:sanctum')->group(function () {
@@ -29,6 +31,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/agendas/{id}/absensi', [AbsensiPublikController::class, 'indexPrivate']);
     Route::post('/agendas/{id}/absensi/manual', [AbsensiPublikController::class, 'storeManual']);
     Route::get('/agendas/{id}/absensi/export', [AbsensiPublikController::class, 'exportCsv']);
+
+    // Surat-Menyurat (Mail Management) Routes
+    Route::get('/surat/templates', [SuratController::class, 'indexTemplate']);
+    Route::post('/surat/templates', [SuratController::class, 'storeTemplate']);
+    Route::get('/surat/templates/{id}', [SuratController::class, 'showTemplate']);
+    Route::put('/surat/templates/{id}', [SuratController::class, 'updateTemplate']);
+    Route::delete('/surat/templates/{id}', [SuratController::class, 'destroyTemplate']);
+    
+    Route::get('/surat/keluar', [SuratController::class, 'indexSuratKeluar']);
+    Route::post('/surat/generate', [SuratController::class, 'generateSurat']);
+    
+    Route::get('/surat/masuk', [SuratController::class, 'indexSuratMasuk']);
+    Route::post('/surat/masuk', [SuratController::class, 'storeSuratMasuk']);
+    Route::post('/surat/masuk/{id}', [SuratController::class, 'updateSuratMasuk']);
+    Route::delete('/surat/masuk/{id}', [SuratController::class, 'destroySuratMasuk']);
 
     // Superadmin specific routes
     Route::middleware('role:Superadmin')->group(function () {
