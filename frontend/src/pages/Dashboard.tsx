@@ -42,6 +42,7 @@ const Dashboard: React.FC = () => {
     { name: 'Jenjang Kaderisasi', path: '/kaderisasi', icon: <Award size={20} />, roles: ['Superadmin', 'Ketua', 'Kaderisasi'] },
     { name: 'Notifikasi', path: '/notifikasi', icon: <Bell size={20} /> },
     { name: 'Pengaturan Sistem', path: '/admin/users', icon: <Settings size={20} />, roles: ['Superadmin'] },
+    { name: 'Profil Publik', path: '/admin/profile', icon: <Settings size={20} />, roles: ['Superadmin'] },
   ];
 
   const filteredSidebarItems = sidebarItems.filter(item => {
