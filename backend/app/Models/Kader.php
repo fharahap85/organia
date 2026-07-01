@@ -47,4 +47,14 @@ class Kader extends Model
     {
         return $this->hasOne(KaderRating::class, 'kader_id');
     }
+
+    public function mentoringGroups()
+    {
+        return $this->hasMany(MentoringGroup::class, 'mentor_id');
+    }
+
+    public function mentoringMemberships()
+    {
+        return $this->hasMany(MentoringMember::class, 'kader_id');
+    }
 }

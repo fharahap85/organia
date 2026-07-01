@@ -14,6 +14,8 @@ import Keuangan from './pages/Keuangan';
 import Laporan from './pages/Laporan';
 import Kader from './pages/Kader';
 import KaderDetail from './pages/KaderDetail';
+import Mentoring from './pages/Mentoring';
+import MentoringDetail from './pages/MentoringDetail';
 import Forbidden from './pages/Forbidden';
 import AuthGuard from './components/AuthGuard';
 import './App.css';
@@ -47,8 +49,29 @@ function App() {
           <Route path="/laporan" element={<Laporan />} />
 
           {/* Kader & Keluarga */}
-          <Route path="/kader" element={<Kader />} />
-          <Route path="/kader/:id" element={<KaderDetail />} />
+          <Route path="/kader" element={
+            <AuthGuard allowedRoles={['Superadmin', 'Ketua', 'Kaderisasi', 'BIPEKA']}>
+              <Kader />
+            </AuthGuard>
+          } />
+          
+          <Route path="/kader/:id" element={
+            <AuthGuard allowedRoles={['Superadmin', 'Ketua', 'Kaderisasi', 'BIPEKA']}>
+              <KaderDetail />
+            </AuthGuard>
+          } />
+
+          <Route path="/mentoring" element={
+            <AuthGuard allowedRoles={['Superadmin', 'Ketua', 'Kaderisasi', 'BIPEKA']}>
+              <Mentoring />
+            </AuthGuard>
+          } />
+          
+          <Route path="/mentoring/:id" element={
+            <AuthGuard allowedRoles={['Superadmin', 'Ketua', 'Kaderisasi', 'BIPEKA']}>
+              <MentoringDetail />
+            </AuthGuard>
+          } />
         </Route>
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
