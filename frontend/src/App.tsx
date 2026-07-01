@@ -11,6 +11,7 @@ import SuratKeluarArsip from './pages/SuratKeluarArsip';
 import SuratMasukPage from './pages/SuratMasuk';
 import SuratVerifikasiPublik from './pages/SuratVerifikasiPublik';
 import Keuangan from './pages/Keuangan';
+import Laporan from './pages/Laporan';
 import Forbidden from './pages/Forbidden';
 import AuthGuard from './components/AuthGuard';
 import './App.css';
@@ -39,6 +40,9 @@ function App() {
 
           {/* Keuangan & OCR */}
           <Route path="/keuangan" element={<Keuangan />} />
+
+          {/* Laporan Bulanan */}
+          <Route path="/laporan" element={<Laporan />} />
         </Route>
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
