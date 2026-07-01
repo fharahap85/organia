@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\SuratController;
 use App\Http\Controllers\Api\DokumentasiController;
 use App\Http\Controllers\Api\KeuanganController;
 use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\KaderController;
 use App\Models\Role;
 
 // Public routes
@@ -68,6 +69,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/laporan/preview', [LaporanController::class, 'preview']);
     Route::post('/laporan/generate', [LaporanController::class, 'store']);
     Route::delete('/laporan/{id}', [LaporanController::class, 'destroy']);
+
+    // Kader & Keluarga (HRIS) Routes
+    Route::get('/kader', [KaderController::class, 'index']);
+    Route::post('/kader', [KaderController::class, 'store']);
+    Route::get('/kader/{id}', [KaderController::class, 'show']);
+    Route::put('/kader/{id}', [KaderController::class, 'update']);
+    Route::delete('/kader/{id}', [KaderController::class, 'destroy']);
+    Route::post('/kader/{id}/keluarga', [KaderController::class, 'storeKeluarga']);
+    Route::delete('/keluarga/{id}', [KaderController::class, 'destroyKeluarga']);
+    Route::put('/pendidikan/{id}', [KaderController::class, 'updatePendidikan']);
 
     // Superadmin specific routes
     Route::middleware('role:Superadmin')->group(function () {

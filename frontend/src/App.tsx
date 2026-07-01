@@ -12,6 +12,8 @@ import SuratMasukPage from './pages/SuratMasuk';
 import SuratVerifikasiPublik from './pages/SuratVerifikasiPublik';
 import Keuangan from './pages/Keuangan';
 import Laporan from './pages/Laporan';
+import Kader from './pages/Kader';
+import KaderDetail from './pages/KaderDetail';
 import Forbidden from './pages/Forbidden';
 import AuthGuard from './components/AuthGuard';
 import './App.css';
@@ -43,6 +45,10 @@ function App() {
 
           {/* Laporan Bulanan */}
           <Route path="/laporan" element={<Laporan />} />
+
+          {/* Kader & Keluarga */}
+          <Route path="/kader" element={<Kader />} />
+          <Route path="/kader/:id" element={<KaderDetail />} />
         </Route>
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
