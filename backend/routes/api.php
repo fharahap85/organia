@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\AbsensiPublikController;
 use App\Http\Controllers\Api\SuratController;
 use App\Http\Controllers\Api\DokumentasiController;
 use App\Http\Controllers\Api\KeuanganController;
+use App\Http\Controllers\Api\LaporanController;
 use App\Models\Role;
 
 // Public routes
@@ -61,6 +62,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/surat/masuk', [SuratController::class, 'storeSuratMasuk']);
     Route::post('/surat/masuk/{id}', [SuratController::class, 'updateSuratMasuk']);
     Route::delete('/surat/masuk/{id}', [SuratController::class, 'destroySuratMasuk']);
+
+    // Laporan Bulanan Routes
+    Route::get('/laporan', [LaporanController::class, 'index']);
+    Route::post('/laporan/preview', [LaporanController::class, 'preview']);
+    Route::post('/laporan/generate', [LaporanController::class, 'store']);
+    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy']);
 
     // Superadmin specific routes
     Route::middleware('role:Superadmin')->group(function () {
