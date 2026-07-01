@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained('roles')->onDelete('restrict');
             $table->foreignId('periode_id')->nullable()->constrained('periode_kepengurusans')->onDelete('set null');
             $table->string('status')->default('active'); // active, inactive
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
