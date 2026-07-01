@@ -43,4 +43,9 @@ class Agenda extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function dokumentasis()
+    {
+        return $this->hasMany(DokumentasiKegiatan::class, 'agenda_id');
+    }
 }

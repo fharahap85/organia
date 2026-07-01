@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AgendaController;
 use App\Http\Controllers\Api\TemplateAbsensiController;
 use App\Http\Controllers\Api\AbsensiPublikController;
 use App\Http\Controllers\Api\SuratController;
+use App\Http\Controllers\Api\DokumentasiController;
 use App\Models\Role;
 
 // Public routes
@@ -31,6 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/agendas/{id}/absensi', [AbsensiPublikController::class, 'indexPrivate']);
     Route::post('/agendas/{id}/absensi/manual', [AbsensiPublikController::class, 'storeManual']);
     Route::get('/agendas/{id}/absensi/export', [AbsensiPublikController::class, 'exportCsv']);
+
+    // Dokumentasi Kegiatan Routes
+    Route::get('/agendas/{id}/dokumentasi', [DokumentasiController::class, 'index']);
+    Route::post('/agendas/{id}/dokumentasi', [DokumentasiController::class, 'store']);
+    Route::delete('/dokumentasi/{id}', [DokumentasiController::class, 'destroy']);
 
     // Surat-Menyurat (Mail Management) Routes
     Route::get('/surat/templates', [SuratController::class, 'indexTemplate']);
