@@ -5,6 +5,11 @@ import Users from './pages/Users';
 import Agendas from './pages/Agendas';
 import AgendaDetail from './pages/AgendaDetail';
 import AbsenFormPublik from './pages/AbsenFormPublik';
+import SuratTemplates from './pages/SuratTemplates';
+import SuratKeluarBuat from './pages/SuratKeluarBuat';
+import SuratKeluarArsip from './pages/SuratKeluarArsip';
+import SuratMasukPage from './pages/SuratMasuk';
+import SuratVerifikasiPublik from './pages/SuratVerifikasiPublik';
 import Forbidden from './pages/Forbidden';
 import AuthGuard from './components/AuthGuard';
 import './App.css';
@@ -17,12 +22,19 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/403" element={<Forbidden />} />
         <Route path="/absen/:uuid_qr" element={<AbsenFormPublik />} />
+        <Route path="/verifikasi-surat/:uuid_verifikasi" element={<SuratVerifikasiPublik />} />
 
         {/* Protected routes */}
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/agendas" element={<Agendas />} />
           <Route path="/agendas/:id" element={<AgendaDetail />} />
+          
+          {/* Surat-Menyurat */}
+          <Route path="/surat/templates" element={<SuratTemplates />} />
+          <Route path="/surat/buat" element={<SuratKeluarBuat />} />
+          <Route path="/surat/keluar" element={<SuratKeluarArsip />} />
+          <Route path="/surat/masuk" element={<SuratMasukPage />} />
         </Route>
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
