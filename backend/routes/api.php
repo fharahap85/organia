@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\MentoringController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +83,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/kader/{id}/kaderisasi', [KaderController::class, 'storeKaderisasi']);
     Route::delete('/kaderisasi/{id}', [KaderController::class, 'destroyKaderisasi']);
     Route::put('/kader/{id}/rating', [KaderController::class, 'updateRating']);
+    
+    // Kelompok Mentoring routes
+    Route::apiResource('mentoring-groups', MentoringController::class);
+    Route::post('/mentoring-groups/{id}/members', [MentoringController::class, 'addMember']);
+    Route::delete('/mentoring-members/{id}', [MentoringController::class, 'removeMember']);
 
     // Superadmin specific routes
     Route::middleware('role:Superadmin')->group(function () {
