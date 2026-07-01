@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\MentoringController;
+use App\Http\Controllers\Api\PublicController;
+use App\Http\Controllers\Api\OrganizationProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +25,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/public/agenda/{uuid_qr}', [AbsensiPublikController::class, 'getAgendaByUuid']);
 Route::post('/public/agenda/{uuid_qr}/absen', [AbsensiPublikController::class, 'submitAbsensi']);
 Route::get('/public/verifikasi-surat/{uuid_verifikasi}', [SuratController::class, 'verifikasiSurat']);
+
+// Public Landing Page routes (no auth)
+Route::get('/public/profile', [PublicController::class, 'getProfile']);
+Route::get('/public/struktur', [PublicController::class, 'getStruktur']);
+Route::get('/public/agendas', [PublicController::class, 'getAgendas']);
 
 // Protected routes (requires Sanctum token)
 Route::middleware('auth:sanctum')->group(function () {
@@ -94,7 +101,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/users', UserController::class);
         Route::apiResource('/periodes', PeriodeController::class);
         Route::apiResource('/strukturs', StrukturController::class);
-        
+
+        // Organization Profile management
+        Route::get('/organization-profile', [OrganizationProfileController::class, 'show']);
+        Route::put('/organization-profile', [OrganizationProfileController::class, 'update']);
+
         // Helper route to get all roles for user management dropdown
         Route::get('/roles', function () {
             return response()->json(Role::all());

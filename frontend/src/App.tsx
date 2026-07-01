@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
+import ProfileSettings from './pages/admin/ProfileSettings';
 import Agendas from './pages/Agendas';
 import AgendaDetail from './pages/AgendaDetail';
 import AbsenFormPublik from './pages/AbsenFormPublik';
@@ -25,6 +27,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/403" element={<Forbidden />} />
         <Route path="/absen/:uuid_qr" element={<AbsenFormPublik />} />
@@ -76,10 +79,10 @@ function App() {
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
           <Route path="/admin/users" element={<Users />} />
+          <Route path="/admin/profile" element={<ProfileSettings />} />
         </Route>
 
         {/* Redirects */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
