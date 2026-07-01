@@ -10,6 +10,7 @@ import SuratKeluarBuat from './pages/SuratKeluarBuat';
 import SuratKeluarArsip from './pages/SuratKeluarArsip';
 import SuratMasukPage from './pages/SuratMasuk';
 import SuratVerifikasiPublik from './pages/SuratVerifikasiPublik';
+import Keuangan from './pages/Keuangan';
 import Forbidden from './pages/Forbidden';
 import AuthGuard from './components/AuthGuard';
 import './App.css';
@@ -35,6 +36,9 @@ function App() {
           <Route path="/surat/buat" element={<SuratKeluarBuat />} />
           <Route path="/surat/keluar" element={<SuratKeluarArsip />} />
           <Route path="/surat/masuk" element={<SuratMasukPage />} />
+
+          {/* Keuangan & OCR */}
+          <Route path="/keuangan" element={<Keuangan />} />
         </Route>
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
