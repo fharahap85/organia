@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Kader;
 use App\Models\AnggotaKeluarga;
 use App\Models\RiwayatPendidikanAnak;
+use App\Models\KaderisasiRecord;
+use App\Models\KaderRating;
 use App\Services\PendidikanEstimatorService;
 use Illuminate\Http\Request;
 
@@ -36,7 +38,7 @@ class KaderController extends Controller
     {
         $kader = Kader::with(['user', 'keluargas.riwayatPendidikans' => function ($q) {
             $q->orderBy('tahun_masuk', 'asc');
-        }])->findOrFail($id);
+        }, 'kaderisasiRecords', 'rating'])->findOrFail($id);
 
         return response()->json($kader);
     }
@@ -171,6 +173,79 @@ class KaderController extends Controller
         return response()->json([
             'message' => 'Riwayat pendidikan berhasil diperbarui.',
             'pendidikan' => $pendidikan
+        ]);
+    }
+    /**
+     * Store Kaderisasi Record.
+     */
+    public function storeKaderisasi(Request $request, string $kaderId)
+    {
+        $kader = Kader::findOrFail($kaderId);
+
+        $request->validate([
+            'jenjang' => 'required|string',
+            'tahun_lulus' => 'required|integer',
+            'predikat' => 'nullable|string',
+            'sertifikat_file' => 'nullable|string',
+        ]);
+
+        $record = KaderisasiRecord::create([
+            'kader_id' => $kader->id,
+            'jenjang' => $request->jenjang,
+            'tahun_lulus' => $request->tahun_lulus,
+            'predikat' => $request->predikat,
+            'sertifikat_file' => $request->sertifikat_file,
+        ]);
+
+        return response()->json([
+            'message' => 'Riwayat kaderisasi berhasil ditambahkan.',
+            'record' => $record
+        ], 210);
+    }
+
+    /**
+     * Delete Kaderisasi Record.
+     */
+    public function destroyKaderisasi(string $id)
+    {
+        $record = KaderisasiRecord::findOrFail($id);
+        $record->delete();
+
+        return response()->json([
+            'message' => 'Riwayat kaderisasi berhasil dihapus.'
+        ]);
+    }
+
+    /**
+     * Update Kader Rating.
+     */
+    public function updateRating(Request $request, string $kaderId)
+    {
+        $kader = Kader::findOrFail($kaderId);
+
+        $request->validate([
+            'kepemimpinan' => 'required|integer|min:1|max:5',
+            'loyalitas' => 'required|integer|min:1|max:5',
+            'komunikasi' => 'required|integer|min:1|max:5',
+            'kreativitas' => 'required|integer|min:1|max:5',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $rating = KaderRating::updateOrCreate(
+            ['kader_id' => $kader->id],
+            [
+                'kepemimpinan' => $request->kepemimpinan,
+                'loyalitas' => $request->loyalitas,
+                'komunikasi' => $request->komunikasi,
+                'kreativitas' => $request->kreativitas,
+                'catatan' => $request->catatan,
+                'rated_by' => auth()->id() ?? 1 // fallback to 1 if not authenticated (should be authed though)
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Rapor kader berhasil diperbarui.',
+            'rating' => $rating
         ]);
     }
 }
