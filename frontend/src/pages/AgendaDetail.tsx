@@ -22,7 +22,12 @@ import {
   LogOut, 
   User as UserIcon,
   CheckCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Camera,
+  Video as VideoIcon,
+  Trash2,
+  Play,
+  X
 } from 'lucide-react';
 
 interface TemplateAbsensi {
@@ -56,6 +61,16 @@ interface Agenda {
   absensis?: Absensi[];
 }
 
+interface DokumentasiKegiatan {
+  id: number;
+  file_path: string;
+  tipe_file: 'image' | 'video';
+  caption: string | null;
+  uploader?: {
+    name: string;
+  };
+}
+
 const AgendaDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user: currentUser, logout } = useAuthStore();
@@ -66,10 +81,33 @@ const AgendaDetail: React.FC = () => {
   const [qrCodeSvg, setQrCodeSvg] = useState('');
   const [qrUrl, setQrUrl] = useState('');
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'absensi' | 'dokumentasi'>('absensi');
+  const [dokumentasis, setDokumentasis] = useState<DokumentasiKegiatan[]>([]);
+  
+  // Documentation Upload states
+  const [caption, setCaption] = useState('');
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docError, setDocError] = useState('');
+
+  // Lightbox state
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxType, setLightboxType] = useState<'image' | 'video' | null>(null);
+
   // Modal manual entry state
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [manualData, setManualData] = useState<any>({});
   const [errorMsg, setErrorMsg] = useState('');
+
+  const fetchDokumentasis = async () => {
+    try {
+      const response = await api.get(`/agendas/${id}/dokumentasi`);
+      setDokumentasis(response.data);
+    } catch (err) {
+      console.error('Error fetching documentation:', err);
+    }
+  };
 
   const fetchAgendaDetails = async () => {
     try {
@@ -82,6 +120,8 @@ const AgendaDetail: React.FC = () => {
       const qrRes = await api.get(`/agendas/${id}/qr`);
       setQrCodeSvg(qrRes.data.qr_code_svg);
       setQrUrl(qrRes.data.url);
+      
+      fetchDokumentasis();
     } catch (err) {
       console.error('Error fetching agenda details:', err);
     }
@@ -140,6 +180,45 @@ const AgendaDetail: React.FC = () => {
       fetchAgendaDetails();
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || 'Gagal menambahkan absensi manual.');
+    }
+  };
+
+  const handleUploadDoc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docFile) return;
+    setUploadingDoc(true);
+    setDocError('');
+
+    const formData = new FormData();
+    formData.append('file', docFile);
+    if (caption) {
+      formData.append('caption', caption);
+    }
+
+    try {
+      await api.post(`/agendas/${id}/dokumentasi`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setDocFile(null);
+      setCaption('');
+      const fileInput = document.getElementById('docFileInput') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      fetchDokumentasis();
+    } catch (err: any) {
+      setDocError(err.response?.data?.message || 'Gagal mengunggah berkas dokumentasi.');
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const handleDeleteDoc = async (docId: number) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus dokumentasi ini?')) {
+      try {
+        await api.delete(`/dokumentasi/${docId}`);
+        fetchDokumentasis();
+      } catch (err) {
+        console.error('Error deleting documentation:', err);
+      }
     }
   };
 
@@ -355,71 +434,176 @@ const AgendaDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Area: Absensi Participant Logs */}
+            {/* Right Area: Tabs for Kehadiran / Dokumentasi */}
             <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col">
-              <header className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-300">Daftar Kehadiran</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Total Hadir: {absensis.length} Orang</p>
-                </div>
-                
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsManualModalOpen(true)}
-                    className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 transition-colors"
-                  >
-                    <Plus size={14} />
-                    Absen Manual
-                  </button>
-                  <button
-                    onClick={handleExport}
-                    className="flex items-center gap-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
-                  >
-                    <FileSpreadsheet size={14} />
-                    Ekspor CSV
-                  </button>
-                </div>
-              </header>
-
-              <div className="overflow-x-auto rounded-xl border border-slate-800">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="bg-slate-800/40 text-slate-400 font-semibold uppercase border-b border-slate-800">
-                    <tr>
-                      {schema.map(field => (
-                        <th key={field.name} className="px-4 py-3">{field.label}</th>
-                      ))}
-                      <th className="px-4 py-3">Waktu</th>
-                      <th className="px-4 py-3">Metode</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800">
-                    {absensis.map(row => (
-                      <tr key={row.id} className="hover:bg-slate-800/10 transition-colors">
-                        {schema.map(field => (
-                          <td key={field.name} className="px-4 py-3 font-medium">
-                            {row.data_kehadiran[field.name] || '-'}
-                          </td>
-                        ))}
-                        <td className="px-4 py-3 text-slate-500">
-                          {new Date(row.waktu_hadir).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            row.operator ? 'bg-indigo-500/10 text-indigo-400' : 'bg-green-500/10 text-green-400'
-                          }`}>
-                            {row.operator ? `Manual (${row.operator.name})` : 'Mandiri'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {absensis.length === 0 && (
-                      <tr>
-                        <td colSpan={schema.length + 2} className="text-center py-8 text-slate-500">Belum ada kehadiran tercatat.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              {/* Tab Header Selector */}
+              <div className="flex gap-4 border-b border-slate-800 pb-3 mb-6 text-sm font-semibold">
+                <button
+                  onClick={() => setActiveTab('absensi')}
+                  className={`pb-2 border-b-2 transition-all ${
+                    activeTab === 'absensi' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Daftar Kehadiran ({absensis.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab('dokumentasi')}
+                  className={`pb-2 border-b-2 transition-all ${
+                    activeTab === 'dokumentasi' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Dokumentasi ({dokumentasis.length})
+                </button>
               </div>
+
+              {activeTab === 'absensi' ? (
+                <>
+                  <header className="flex justify-between items-center mb-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-300">Daftar Kehadiran</h3>
+                      <p className="text-xs text-slate-500 mt-0.5 font-semibold">Total Hadir: {absensis.length} Orang</p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsManualModalOpen(true)}
+                        className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 transition-colors"
+                      >
+                        <Plus size={14} />
+                        Absen Manual
+                      </button>
+                      <button
+                        onClick={handleExport}
+                        className="flex items-center gap-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        <FileSpreadsheet size={14} />
+                        Ekspor CSV
+                      </button>
+                    </div>
+                  </header>
+
+                  <div className="overflow-x-auto rounded-xl border border-slate-800">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead className="bg-slate-800/40 text-slate-400 font-semibold uppercase border-b border-slate-800">
+                        <tr>
+                          {schema.map(field => (
+                            <th key={field.name} className="px-4 py-3">{field.label}</th>
+                          ))}
+                          <th className="px-4 py-3">Waktu</th>
+                          <th className="px-4 py-3">Metode</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {absensis.map(row => (
+                          <tr key={row.id} className="hover:bg-slate-800/10 transition-colors">
+                            {schema.map(field => (
+                              <td key={field.name} className="px-4 py-3 font-medium">
+                                {row.data_kehadiran[field.name] || '-'}
+                              </td>
+                            ))}
+                            <td className="px-4 py-3 text-slate-500">
+                              {new Date(row.waktu_hadir).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                row.operator ? 'bg-indigo-500/10 text-indigo-400' : 'bg-green-500/10 text-green-400'
+                              }`}>
+                                {row.operator ? `Manual (${row.operator.name})` : 'Mandiri'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {absensis.length === 0 && (
+                          <tr>
+                            <td colSpan={schema.length + 2} className="text-center py-8 text-slate-500">Belum ada kehadiran tercatat.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-6">
+                  {/* Upload Form */}
+                  <form onSubmit={handleUploadDoc} className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-4">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase">Unggah Dokumentasi Baru</h4>
+                    {docError && (
+                      <div className="bg-red-500/10 border border-red-500/50 text-red-300 p-2.5 rounded-lg text-xs">
+                        {docError}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <input
+                          type="file"
+                          id="docFileInput"
+                          accept="image/*,video/mp4"
+                          onChange={(e) => setDocFile(e.target.files ? e.target.files[0] : null)}
+                          className="w-full text-xs text-slate-400 bg-slate-900 border border-slate-800 rounded-lg p-2 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={caption}
+                          onChange={(e) => setCaption(e.target.value)}
+                          placeholder="Tambahkan keterangan foto/video..."
+                          className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={uploadingDoc}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 disabled:bg-indigo-800"
+                    >
+                      <Camera size={14} />
+                      {uploadingDoc ? 'Mengunggah...' : 'Unggah File'}
+                    </button>
+                  </form>
+
+                  {/* Gallery Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {dokumentasis.map(doc => (
+                      <div key={doc.id} className="group relative bg-slate-950 border border-slate-850 rounded-xl overflow-hidden shadow">
+                        {doc.tipe_file === 'video' ? (
+                          <div 
+                            onClick={() => { setLightboxUrl(doc.file_path); setLightboxType('video'); }}
+                            className="aspect-video w-full bg-slate-900 flex items-center justify-center cursor-pointer relative"
+                          >
+                            <VideoIcon className="text-indigo-400" size={32} />
+                            <span className="absolute bottom-2 right-2 bg-black/60 p-1 rounded-full"><Play size={10} className="text-white" /></span>
+                          </div>
+                        ) : (
+                          <img
+                            src={`${api.defaults.baseURL?.replace('/api', '')}/${doc.file_path}`}
+                            alt={doc.caption || 'Dokumentasi'}
+                            onClick={() => { setLightboxUrl(doc.file_path); setLightboxType('image'); }}
+                            className="aspect-video w-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                          />
+                        )}
+                        <div className="p-2 border-t border-slate-850 flex justify-between items-start gap-2">
+                          <div className="min-w-0">
+                            <p className="text-[10px] text-slate-400 font-semibold truncate">{doc.caption || 'Tanpa keterangan'}</p>
+                            <p className="text-[9px] text-slate-500 truncate">Oleh: {doc.uploader?.name || 'Sistem'}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteDoc(doc.id)}
+                            className="text-red-400 hover:text-red-300 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Hapus"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {dokumentasis.length === 0 && (
+                      <div className="col-span-full text-center py-12 text-slate-500">Belum ada dokumentasi terunggah.</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </main>
@@ -465,6 +649,34 @@ const AgendaDetail: React.FC = () => {
                 </button>
               </footer>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Viewer Modal */}
+      {lightboxUrl && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <button 
+            onClick={() => { setLightboxUrl(null); setLightboxType(null); }} 
+            className="absolute top-4 right-4 text-white hover:text-slate-300 p-2 bg-slate-900/50 rounded-full"
+          >
+            <X size={28} />
+          </button>
+          <div className="max-w-4xl max-h-[85vh] flex flex-col items-center">
+            {lightboxType === 'video' ? (
+              <video 
+                src={`${api.defaults.baseURL?.replace('/api', '')}/${lightboxUrl}`} 
+                controls 
+                className="max-w-full max-h-[75vh] rounded-xl" 
+                autoPlay 
+              />
+            ) : (
+              <img 
+                src={`${api.defaults.baseURL?.replace('/api', '')}/${lightboxUrl}`} 
+                alt="Pratinjau dokumentasi" 
+                className="max-w-full max-h-[75vh] rounded-xl object-contain" 
+              />
+            )}
           </div>
         </div>
       )}
