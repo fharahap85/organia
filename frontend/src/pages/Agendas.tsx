@@ -290,7 +290,12 @@ const Agendas: React.FC = () => {
       {/* Main Content */}
       <div className="flex-grow flex flex-col min-w-0">
         <header className="h-16 border-b border-slate-800 bg-slate-900/50 px-8 flex items-center justify-between shrink-0">
-          <h1 className="text-xl font-bold">Agenda Kegiatan</h1>
+          <div className="flex gap-4 items-center">
+            <h1 className="text-xl font-bold">Agenda Kegiatan</h1>
+            <nav className="flex gap-2 text-xs">
+              <Link to="/template-absensis" className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-full font-bold">Template Absensi</Link>
+            </nav>
+          </div>
           <button 
             onClick={openAddModal}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md"
