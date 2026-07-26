@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore';
+import { useAuthStore } from '../store/authStore';
 import {
   LayoutDashboard, Calendar, Mail, Wallet, FileBarChart, Users,
   Award, Bell, Settings, LogOut, User as UserIcon, Menu, X

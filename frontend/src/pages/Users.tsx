@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Layout from '../components/Layout';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
@@ -27,7 +26,6 @@ interface User {
 }
 
 const Users: React.FC = () => {
-  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
