@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import { CheckCircle2, AlertTriangle, MapPin, Calendar, Clock } from 'lucide-react';
+import SignaturePad from '../components/SignaturePad';
 
 interface SchemaField {
   name: string;
-  type: 'text' | 'number' | 'select' | 'textarea';
+  type: 'text' | 'number' | 'select' | 'textarea' | 'signature';
   label: string;
   required: boolean;
   options?: string[];
@@ -180,6 +181,11 @@ const AbsenFormPublik: React.FC = () => {
                       onChange={(e) => handleInputChange(field.name, e.target.value)}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm h-20 resize-none text-white focus:outline-none focus:border-indigo-500"
                       required={field.required}
+                    />
+                  ) : field.type === 'signature' ? (
+                    <SignaturePad
+                      value={formData[field.name] || ''}
+                      onChange={(v) => handleInputChange(field.name, v)}
                     />
                   ) : (
                     <input
