@@ -19,6 +19,8 @@ import Kader from './pages/Kader';
 import KaderDetail from './pages/KaderDetail';
 import Mentoring from './pages/Mentoring';
 import MentoringDetail from './pages/MentoringDetail';
+import Kaderisasi from './pages/Kaderisasi';
+import Notifikasi from './pages/Notifikasi';
 import Forbidden from './pages/Forbidden';
 import AuthGuard from './components/AuthGuard';
 import './App.css';
@@ -77,6 +79,13 @@ function App() {
               <MentoringDetail />
             </AuthGuard>
           } />
+
+          <Route path="/kaderisasi" element={
+            <AuthGuard allowedRoles={['Superadmin', 'Ketua', 'Kaderisasi']}>
+              <Kaderisasi />
+            </AuthGuard>
+          } />
+          <Route path="/notifikasi" element={<Notifikasi />} />
         </Route>
 
         <Route element={<AuthGuard requiredRole="Superadmin" />}>
