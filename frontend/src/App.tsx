@@ -8,6 +8,7 @@ import Agendas from './pages/Agendas';
 import AgendaDetail from './pages/AgendaDetail';
 import AbsenFormPublik from './pages/AbsenFormPublik';
 import SuratTemplates from './pages/SuratTemplates';
+import TemplateAbsensis from './pages/TemplateAbsensis';
 import SuratKeluarBuat from './pages/SuratKeluarBuat';
 import SuratKeluarArsip from './pages/SuratKeluarArsip';
 import SuratMasukPage from './pages/SuratMasuk';
@@ -38,6 +39,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/agendas" element={<Agendas />} />
           <Route path="/agendas/:id" element={<AgendaDetail />} />
+          <Route path="/template-absensis" element={<TemplateAbsensis />} />
           
           {/* Surat-Menyurat */}
           <Route path="/surat/templates" element={<SuratTemplates />} />
