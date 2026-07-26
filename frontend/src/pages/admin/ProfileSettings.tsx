@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import api from '../services/api';
+import { useAuthStore } from '../../store/authStore';
+import api from '../../services/api';
 import {
   LayoutDashboard, Calendar, Mail, Wallet, FileBarChart, Users as UsersIcon,
   Award, Bell, Settings, LogOut, User as UserIcon, Globe, Save
