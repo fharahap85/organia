@@ -8,7 +8,6 @@ interface SignaturePadProps {
 const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [hasDrawn, setHasDrawn] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,13 +22,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-
-    if (value && !hasDrawn) {
-      const img = new Image();
-      img.onload = () => ctx.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
-      img.src = value;
-    }
-  }, [value]);
+  }, []);
 
   const getPos = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -47,11 +40,11 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     const pos = getPos(e);
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
     setIsDrawing(true);
-    setHasDrawn(true);
   };
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
@@ -80,9 +73,25 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setHasDrawn(false);
     onChange('');
   };
+
+  if (value && !isDrawing) {
+    return (
+      <div className="space-y-2">
+        <div className="bg-white rounded-xl overflow-hidden border border-slate-800 p-2 flex items-center justify-center min-h-32">
+          <img src={value} alt="Tanda tangan" className="max-h-28 w-auto object-contain" />
+        </div>
+        <button
+          type="button"
+          onClick={handleClear}
+          className="text-xs text-red-400 hover:text-red-300 font-semibold"
+        >
+          Hapus Tanda Tangan
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -99,19 +108,12 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
           onTouchMove={draw}
           onTouchEnd={endDraw}
         />
-        {!hasDrawn && !value && (
+        {!value && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-400 text-xs select-none">
             Tanda tangan di sini
           </div>
         )}
       </div>
-      <button
-        type="button"
-        onClick={handleClear}
-        className="text-xs text-red-400 hover:text-red-300 font-semibold"
-      >
-        Hapus Tanda Tangan
-      </button>
     </div>
   );
 };
