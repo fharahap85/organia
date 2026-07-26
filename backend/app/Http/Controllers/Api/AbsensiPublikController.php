@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Agenda;
 use App\Models\Absensi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -132,10 +134,23 @@ class AbsensiPublikController extends Controller
 
     /**
      * Export attendance rekap to CSV.
-     * Protected endpoint (requires auth)
+     * Accepts token from query string for window.open() compatibility.
      */
-    public function exportCsv(string $agendaId)
+    public function exportCsv(Request $request, string $agendaId)
     {
+        // Authenticate from query string token (for window.open download)
+        $token = $request->token;
+        if ($token) {
+            $accessToken = PersonalAccessToken::findToken($token);
+            if ($accessToken) {
+                Auth::login($accessToken->tokenable);
+            }
+        }
+
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
         $agenda = Agenda::with('templateAbsensi')->findOrFail($agendaId);
         $absensis = Absensi::where('agenda_id', $agenda->id)->orderBy('waktu_hadir', 'asc')->get();
 
