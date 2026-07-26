@@ -38,8 +38,15 @@ const AbsenFormPublik: React.FC = () => {
         const response = await api.get(`/public/agenda/${uuid_qr}`);
         setAgenda(response.data);
       } catch (err: any) {
-        if (err.response && err.response.data && err.response.data.message) {
+        console.error('AbsenFormPublik fetch error:', err?.response?.data || err?.message || err);
+        if (err.response?.data?.message) {
           setErrorMsg(err.response.data.message);
+        } else if (err.response?.data?.errors) {
+          const errors = err.response.data.errors;
+          const firstKey = Object.keys(errors)[0];
+          setErrorMsg(errors[firstKey][0]);
+        } else if (err.message === 'Network Error') {
+          setErrorMsg('Tidak dapat terhubung ke server. Pastikan koneksi internet Anda stabil.');
         } else {
           setErrorMsg('Agenda tidak ditemukan atau absensi belum dibuka.');
         }
