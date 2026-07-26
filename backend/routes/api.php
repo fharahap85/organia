@@ -42,6 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/agendas/{id}/qr', [AgendaController::class, 'qr']);
     Route::get('/agendas/{id}/absensi', [AbsensiPublikController::class, 'indexPrivate']);
     Route::post('/agendas/{id}/absensi/manual', [AbsensiPublikController::class, 'storeManual']);
+    Route::put('/agendas/{agendaId}/absensi/{absensiId}', [AbsensiPublikController::class, 'updateAbsensi']);
+    Route::delete('/agendas/{agendaId}/absensi/{absensiId}', [AbsensiPublikController::class, 'destroyAbsensi']);
 
     // Dokumentasi Kegiatan Routes
     Route::get('/agendas/{id}/dokumentasi', [DokumentasiController::class, 'index']);

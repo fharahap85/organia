@@ -25,7 +25,8 @@ import {
   Video as VideoIcon,
   Trash2,
   Play,
-  X
+  X,
+  Edit3
 } from 'lucide-react';
 
 interface TemplateAbsensi {
@@ -97,6 +98,12 @@ const AgendaDetail: React.FC = () => {
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [manualData, setManualData] = useState<any>({});
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Modal edit entry state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editAbsensiId, setEditAbsensiId] = useState<number | null>(null);
+  const [editData, setEditData] = useState<any>({});
+  const [editErrorMsg, setEditErrorMsg] = useState('');
 
   const fetchDokumentasis = async () => {
     try {
@@ -178,6 +185,39 @@ const AgendaDetail: React.FC = () => {
       fetchAgendaDetails();
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || 'Gagal menambahkan absensi manual.');
+    }
+  };
+
+  const openEditModal = (row: Absensi) => {
+    setEditAbsensiId(row.id);
+    setEditData({ ...row.data_kehadiran });
+    setEditErrorMsg('');
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditAbsen = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditErrorMsg('');
+    try {
+      await api.put(`/agendas/${id}/absensi/${editAbsensiId}`, {
+        data_kehadiran: editData
+      });
+      setIsEditModalOpen(false);
+      setEditAbsensiId(null);
+      setEditData({});
+      fetchAgendaDetails();
+    } catch (err: any) {
+      setEditErrorMsg(err.response?.data?.message || 'Gagal mengubah data kehadiran.');
+    }
+  };
+
+  const handleDeleteAbsen = async (absensiId: number) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data kehadiran ini?')) return;
+    try {
+      await api.delete(`/agendas/${id}/absensi/${absensiId}`);
+      fetchAgendaDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menghapus kehadiran.');
     }
   };
 
@@ -491,6 +531,7 @@ const AgendaDetail: React.FC = () => {
                           ))}
                           <th className="px-4 py-3">Waktu</th>
                           <th className="px-4 py-3">Metode</th>
+                          <th className="px-4 py-3">Aksi</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800">
@@ -519,11 +560,29 @@ const AgendaDetail: React.FC = () => {
                                 {row.operator ? `Manual (${row.operator.name})` : 'Mandiri'}
                               </span>
                             </td>
+                            <td className="px-4 py-3">
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() => openEditModal(row)}
+                                  className="p-1.5 bg-slate-800 hover:bg-indigo-500/20 text-slate-400 hover:text-indigo-400 rounded-lg transition-colors"
+                                  title="Ubah"
+                                >
+                                  <Edit3 size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteAbsen(row.id)}
+                                  className="p-1.5 bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-lg transition-colors"
+                                  title="Hapus"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                         {absensis.length === 0 && (
                           <tr>
-                            <td colSpan={schema.length + 2} className="text-center py-8 text-slate-500">Belum ada kehadiran tercatat.</td>
+                            <td colSpan={schema.length + 3} className="text-center py-8 text-slate-500">Belum ada kehadiran tercatat.</td>
                           </tr>
                         )}
                       </tbody>
@@ -654,6 +713,50 @@ const AgendaDetail: React.FC = () => {
                 </button>
                 <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25">
                   Catat Hadir
+                </button>
+              </footer>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Absensi Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <header className="p-6 border-b border-slate-800 flex justify-between items-center">
+              <h2 className="text-lg font-bold">Ubah Data Kehadiran</h2>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </header>
+
+            <form onSubmit={handleEditAbsen} className="p-6 space-y-4">
+              {editErrorMsg && (
+                <div className="bg-red-500/10 border border-red-500/50 text-red-300 p-3 rounded-xl text-xs">
+                  {editErrorMsg}
+                </div>
+              )}
+
+              {schema.filter((f: any) => f.type !== 'signature').map(field => (
+                <div key={field.name}>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-2">
+                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type={field.type === 'number' ? 'number' : 'text'}
+                    value={editData[field.name] || ''}
+                    onChange={(e) => setEditData({ ...editData, [field.name]: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm"
+                    required={field.required}
+                  />
+                </div>
+              ))}
+
+              <footer className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-semibold">
+                  Batal
+                </button>
+                <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25">
+                  Simpan Perubahan
                 </button>
               </footer>
             </form>
