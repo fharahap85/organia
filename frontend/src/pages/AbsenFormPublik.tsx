@@ -144,7 +144,7 @@ const AbsenFormPublik: React.FC = () => {
             <div className="pt-2 grid grid-cols-1 gap-2 text-xs text-slate-400 border-t border-slate-800">
               <div className="flex items-center gap-2">
                 <Calendar size={14} className="text-indigo-400" />
-                <span>{new Date(agenda.tanggal_mulai).toLocaleDateString('id-ID', { weekday: 'long', dateStyle: 'medium' })}</span>
+                <span>{new Date(agenda.tanggal_mulai).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={14} className="text-indigo-400" />
