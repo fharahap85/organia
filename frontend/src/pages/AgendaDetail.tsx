@@ -413,8 +413,10 @@ const AgendaDetail: React.FC = () => {
               <h3 className="text-lg font-bold text-slate-300 mb-4">QR Code Kehadiran</h3>
               {qrCodeSvg ? (
                 <div 
-                  className="bg-white p-4 rounded-2xl border-4 border-indigo-500/20 max-w-[200px]" 
-                  dangerouslySetInnerHTML={{ __html: qrCodeSvg }} 
+                  className="bg-white p-4 rounded-2xl border-4 border-indigo-500/20 w-full max-w-[220px]"
+                  dangerouslySetInnerHTML={{ 
+                    __html: qrCodeSvg.replace(/width="\d+"/, 'width="100%"').replace(/height="\d+"/, 'height="auto"') 
+                  }} 
                 />
               ) : (
                 <div className="h-44 w-44 bg-slate-800 rounded-xl animate-pulse flex items-center justify-center">Memuat QR...</div>
