@@ -134,6 +134,44 @@ class AbsensiPublikController extends Controller
     }
 
     /**
+     * Update a single attendance record.
+     * Protected endpoint (requires auth)
+     */
+    public function updateAbsensi(Request $request, string $agendaId, string $absensiId)
+    {
+        $agenda = Agenda::findOrFail($agendaId);
+        $absensi = Absensi::where('agenda_id', $agenda->id)->findOrFail($absensiId);
+
+        $request->validate([
+            'data_kehadiran' => 'required|array',
+        ]);
+
+        $absensi->update([
+            'data_kehadiran' => $request->data_kehadiran,
+        ]);
+
+        return response()->json([
+            'message' => 'Kehadiran berhasil diubah.',
+            'absensi' => $absensi->load('operator')
+        ]);
+    }
+
+    /**
+     * Delete a single attendance record (soft delete).
+     * Protected endpoint (requires auth)
+     */
+    public function destroyAbsensi(string $agendaId, string $absensiId)
+    {
+        $agenda = Agenda::findOrFail($agendaId);
+        $absensi = Absensi::where('agenda_id', $agenda->id)->findOrFail($absensiId);
+        $absensi->delete();
+
+        return response()->json([
+            'message' => 'Kehadiran berhasil dihapus.'
+        ]);
+    }
+
+    /**
      * Export attendance rekap to CSV.
      * Accepts token from query string for window.open() compatibility.
      */
