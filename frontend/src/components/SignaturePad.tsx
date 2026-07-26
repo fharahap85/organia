@@ -22,6 +22,12 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+
+    if (value) {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
+      img.src = value;
+    }
   }, []);
 
   const getPos = (e: React.MouseEvent | React.TouchEvent) => {
@@ -76,27 +82,12 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
     onChange('');
   };
 
-  if (value && !isDrawing) {
-    return (
-      <div className="space-y-2">
-        <div className="bg-white rounded-xl overflow-hidden border border-slate-800 p-2 flex items-center justify-center min-h-32">
-          <img src={value} alt="Tanda tangan" className="max-h-28 w-auto object-contain" />
-        </div>
-        <button
-          type="button"
-          onClick={handleClear}
-          className="text-xs text-red-400 hover:text-red-300 font-semibold"
-        >
-          Hapus Tanda Tangan
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-2">
-      <div className="relative bg-white rounded-xl overflow-hidden border border-slate-800"
-        style={{ touchAction: 'none' }}>
+      <div
+        className="relative rounded-xl overflow-hidden border border-slate-800 bg-white"
+        style={{ touchAction: 'none' }}
+      >
         <canvas
           ref={canvasRef}
           className="w-full h-32 cursor-crosshair"
@@ -108,12 +99,21 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange }) => {
           onTouchMove={draw}
           onTouchEnd={endDraw}
         />
-        {!value && (
+        {!value && !isDrawing && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-400 text-xs select-none">
             Tanda tangan di sini
           </div>
         )}
       </div>
+      {value && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="text-xs text-red-400 hover:text-red-300 font-semibold"
+        >
+          Hapus Tanda Tangan
+        </button>
+      )}
     </div>
   );
 };
