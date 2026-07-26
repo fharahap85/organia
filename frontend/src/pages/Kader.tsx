@@ -17,7 +17,6 @@ import {
   LogOut, 
   User as UserIcon,
   Search,
-  CheckCircle,
   Eye
 } from 'lucide-react';
 

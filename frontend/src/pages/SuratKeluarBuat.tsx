@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { 
-  Plus, 
   Trash2, 
   LayoutDashboard, 
   Calendar, 

@@ -21,7 +21,7 @@ interface OrgProfile {
 const ProfileSettings: React.FC = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<OrgProfile | null>(null);
+  const [, setProfile] = useState<OrgProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');

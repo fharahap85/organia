@@ -20,6 +20,7 @@ interface User {
   periode_id: number | null;
   status: string;
   role?: Role;
+  periode?: any;
 }
 
 interface AuthState {
