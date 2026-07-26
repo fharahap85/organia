@@ -16,71 +16,110 @@ Organia adalah platform manajemen organisasi berbasis web yang dirancang untuk m
 | **Jenjang Kaderisasi** | Rapor kader, riwayat pelatihan, syarat kenaikan jenjang |
 | **Dokumentasi Kegiatan** | Galeri foto/video per agenda, terintegrasi dengan laporan |
 | **Notifikasi Terpusat** | In-app notification untuk pengingat agenda, surat, verifikasi struk, dll |
-| **Manajemen Pengguna** | RBAC multi-peran, periodisasi kepengurusan, struktur organisasi |
+| **Manajemen Pengguna** | RBAC multi-peran (Superadmin, Ketua, Sekretaris, Bendahara, Kaderisasi, BIPEKA), periodisasi kepengurusan |
 | **Halaman Publik** | Profil organisasi, struktur pengurus, kalender kegiatan (opsional) |
+| **Kelompok Mentoring** | CRUD mentoring group & members |
+
+## Arsitektur
+
+API-first — backend Laravel menyediakan REST API yang dikonsumsi oleh frontend React SPA terpisah. Proses berat (OCR, generate PDF, notifikasi) dijalankan via background queue.
+
+```
+organia/
+├── backend/              # Laravel 12 API (PHP 8.2+)
+│   ├── app/
+│   │   ├── Http/Controllers/Api/   # REST API controllers
+│   │   ├── Models/                 # Eloquent models
+│   │   ├── Services/               # Business logic services
+│   │   └── Traits/                 # Shared traits
+│   ├── database/
+│   │   ├── migrations/             # Schema definitions
+│   │   └── seeders/                # Initial data seeders
+│   ├── routes/api.php              # API route definitions
+│   └── tests/                      # PHPUnit tests
+├── frontend/             # React 19 + TypeScript SPA
+│   └── src/
+│       ├── components/             # Shared components (Layout, AuthGuard)
+│       ├── pages/                  # Page components
+│       ├── services/               # Axios API client
+│       └── store/                  # Zustand auth store
+├── PRD_Organia.md        # Product Requirements Document
+└── WORKFLOW.md            # Pola kerja & branching convention
+```
 
 ## Tech Stack
 
 | Komponen | Teknologi |
 |----------|-----------|
-| **Backend** | Laravel (REST API, Sanctum auth) |
-| **Frontend** | React + TypeScript (SPA) |
+| **Backend** | Laravel 12, PHP 8.2, Sanctum |
+| **Frontend** | React 19, TypeScript, Tailwind CSS v4, Zustand, React Router v7 |
 | **Database** | PostgreSQL |
 | **Queue** | Laravel Queue (database/Redis) |
 | **OCR** | Tesseract OCR + Intervention Image |
 | **PDF** | Spatie Laravel PDF / DomPDF |
 | **QR Code** | Simple QR Code |
+| **Testing** | PHPUnit 11 |
 | **Hosting** | VPS (Docker) |
 
-## Arsitektur
+## Setup Lokal
 
-API-first architecture — backend Laravel menyediakan REST API yang dikonsumsi oleh frontend React SPA terpisah. Proses berat (OCR, generate PDF) dijalankan via background queue.
-
-## Struktur Proyek
-
-```
-organia/
-├── backend/          # Laravel REST API
-│   ├── app/
-│   ├── config/
-│   ├── database/
-│   ├── routes/
-│   └── ...
-├── frontend/         # React + TypeScript SPA
-│   ├── src/
-│   └── ...
-├── docs/             # Dokumentasi tambahan
-├── PRD_Organia.md    # Product Requirements Document
-└── WORKFLOW.md       # Pola kerja & branching convention
-```
-
-## Persiapan Pengembangan
-
-### Prasyarat
-
-- PHP 8.x + Composer
-- Node.js 18+ + npm
-- PostgreSQL
-- Tesseract OCR (untuk fitur struk)
-
-### Setup Backend
-
+### Backend
 ```bash
 cd backend
-cp .env.example .env
 composer install
+cp .env.example .env
 php artisan key:generate
-php artisan migrate
+php artisan migrate:fresh --seed
 php artisan serve
 ```
 
-### Setup Frontend
-
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+Default login: `superadmin@organia.local` / `password`
+
+## Testing
+```bash
+cd backend
+php artisan test
+```
+
+22 tests mencakup:
+- **Unit**: SuratService, PendidikanEstimatorService, LaporanGeneratorService
+- **Feature**: Auth (login, logout, me, RBAC)
+
+## API Endpoints
+
+### Public (Tanpa Auth)
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/login` | Login & dapatkan token |
+| GET | `/api/public/profile` | Profil organisasi |
+| GET | `/api/public/struktur` | Struktur kepengurusan aktif |
+| GET | `/api/public/agendas` | Daftar agenda publik |
+| GET | `/api/public/agenda/{uuid}` | Detail agenda untuk absen QR |
+| POST | `/api/public/agenda/{uuid}/absen` | Submit absensi publik |
+
+### Protected (Bearer Token)
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/logout` | Logout |
+| GET | `/api/me` | Data user login |
+| CRUD | `/api/agendas` | Manajemen agenda |
+| CRUD | `/api/template-absensis` | Template form absensi |
+| CRUD | `/api/users` | Manajemen user (Superadmin) |
+| CRUD | `/api/periodes` | Manajemen periode (Superadmin) |
+| CRUD | `/api/strukturs` | Struktur organisasi (Superadmin) |
+| CRUD | `/api/surat/templates` | Template surat |
+| POST | `/api/surat/generate` | Generate surat dari template |
+| CRUD | `/api/keuangan/struk` | Upload & verifikasi struk |
+| GET | `/api/keuangan/summary` | Ringkasan keuangan per agenda |
+| CRUD | `/api/kader` | Data kader & HRIS |
+| CRUD | `/api/mentoring-groups` | Kelompok mentoring |
 
 ## Pengembangan
 
