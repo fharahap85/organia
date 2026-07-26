@@ -112,6 +112,5 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-// Export route — placed outside auth:sanctum group so token.query runs before auth:sanctum
-Route::get('/agendas/{id}/absensi/export', [AbsensiPublikController::class, 'exportCsv'])
-    ->middleware('token.query', 'auth:sanctum');
+// Export route — auth handled manually in controller (accepts token from query string)
+Route::get('/agendas/{id}/absensi/export', [AbsensiPublikController::class, 'exportCsv']);
