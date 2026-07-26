@@ -7,6 +7,7 @@ use App\Models\Agenda;
 use App\Models\Absensi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
