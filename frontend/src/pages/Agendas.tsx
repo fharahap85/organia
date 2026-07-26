@@ -576,6 +576,7 @@ const Agendas: React.FC = () => {
                         <option value="text">Teks Pendek</option>
                         <option value="number">Angka / NIK</option>
                         <option value="textarea">Teks Panjang</option>
+                        <option value="signature">Tanda Tangan</option>
                       </select>
                       <select
                         value={col.required ? 'true' : 'false'}

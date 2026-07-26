@@ -496,9 +496,17 @@ const AgendaDetail: React.FC = () => {
                       <tbody className="divide-y divide-slate-800">
                         {absensis.map(row => (
                           <tr key={row.id} className="hover:bg-slate-800/10 transition-colors">
-                            {schema.map(field => (
+                            {schema.map((field: any) => (
                               <td key={field.name} className="px-4 py-3 font-medium">
-                                {row.data_kehadiran[field.name] || '-'}
+                                {field.type === 'signature' && row.data_kehadiran[field.name] ? (
+                                  <img
+                                    src={row.data_kehadiran[field.name]}
+                                    alt="Tanda tangan"
+                                    className="h-10 w-auto object-contain rounded border border-slate-700 bg-white"
+                                  />
+                                ) : (
+                                  row.data_kehadiran[field.name] || '-'
+                                )}
                               </td>
                             ))}
                             <td className="px-4 py-3 text-slate-500">
@@ -625,7 +633,7 @@ const AgendaDetail: React.FC = () => {
                 </div>
               )}
 
-              {schema.map(field => (
+              {schema.filter((f: any) => f.type !== 'signature').map(field => (
                 <div key={field.name}>
                   <label className="block text-xs font-bold text-slate-400 uppercase mb-2">
                     {field.label} {field.required && <span className="text-red-500">*</span>}

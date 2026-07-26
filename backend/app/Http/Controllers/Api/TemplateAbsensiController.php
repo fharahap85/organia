@@ -25,7 +25,7 @@ class TemplateAbsensiController extends Controller
             'nama_template' => 'required|string|max:255',
             'skema_kolom' => 'required|array',
             'skema_kolom.*.name' => 'required|string',
-            'skema_kolom.*.type' => 'required|string|in:text,number,select,textarea',
+            'skema_kolom.*.type' => 'required|string|in:text,number,select,textarea,signature',
             'skema_kolom.*.label' => 'required|string',
             'skema_kolom.*.required' => 'required|boolean',
             'skema_kolom.*.options' => 'nullable|array', // array of strings for select options
@@ -62,7 +62,7 @@ class TemplateAbsensiController extends Controller
             'nama_template' => 'required|string|max:255',
             'skema_kolom' => 'required|array',
             'skema_kolom.*.name' => 'required|string',
-            'skema_kolom.*.type' => 'required|string|in:text,number,select,textarea',
+            'skema_kolom.*.type' => 'required|string|in:text,number,select,textarea,signature',
             'skema_kolom.*.label' => 'required|string',
             'skema_kolom.*.required' => 'required|boolean',
             'skema_kolom.*.options' => 'nullable|array',
