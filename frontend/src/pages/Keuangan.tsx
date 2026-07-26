@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { 
-  Plus, 
   Trash2, 
   Download, 
   LayoutDashboard, 
@@ -17,12 +16,8 @@ import {
   Settings, 
   LogOut, 
   User as UserIcon,
-  Search,
-  CheckCircle,
-  Clock,
   AlertTriangle,
-  ZoomIn,
-  FileSpreadsheet
+  ZoomIn
 } from 'lucide-react';
 
 interface Agenda {

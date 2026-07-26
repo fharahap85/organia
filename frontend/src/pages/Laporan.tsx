@@ -3,9 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { 
-  Plus, 
   Trash2, 
-  Download, 
   LayoutDashboard, 
   Calendar, 
   Mail, 
@@ -17,10 +15,7 @@ import {
   Settings, 
   LogOut, 
   User as UserIcon,
-  FileText,
   AlertTriangle,
-  Clock,
-  Printer,
   ChevronRight
 } from 'lucide-react';
 

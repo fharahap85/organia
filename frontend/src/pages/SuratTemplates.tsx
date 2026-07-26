@@ -6,7 +6,6 @@ import {
   Plus, 
   Edit, 
   Trash2, 
-  FileText, 
   LayoutDashboard, 
   Calendar, 
   Mail, 
@@ -210,7 +209,7 @@ const SuratTemplates: React.FC = () => {
                         <span key={ph} className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">{`{{${ph}}}`}</span>
                       ))}
                       {(!tpl.layout_config?.placeholders || tpl.layout_config.placeholders.length === 0) && (
-                        <span className="text-[10px] text-slate-600 italic">Hanya sistem default ({{nomor_surat}}, {{tanggal_surat}})</span>
+                        <span className="text-[10px] text-slate-600 italic">{'Hanya sistem default ({{nomor_surat}}, {{tanggal_surat}})'}</span>
                       )}
                     </div>
                   </div>

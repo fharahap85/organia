@@ -17,11 +17,7 @@ import {
   LogOut, 
   User as UserIcon,
   Plus,
-  CheckCircle,
-  FileText,
-  Clock,
   GraduationCap,
-  Star,
   Edit3
 } from 'lucide-react';
 
@@ -470,7 +466,7 @@ const KaderDetail: React.FC = () => {
                     <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tanggal Lahir</label>
                     <input
                       type="date"
-                      value={tanggalLair}
+                      value={tanggalLahir}
                       onChange={(e) => setTanggalLair(e.target.value)}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white"
                     />

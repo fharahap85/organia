@@ -4,7 +4,6 @@ import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { 
   ArrowLeft, 
-  Download, 
   Printer, 
   Plus, 
   FileText, 
@@ -21,7 +20,6 @@ import {
   Settings, 
   LogOut, 
   User as UserIcon,
-  CheckCircle,
   FileSpreadsheet,
   Camera,
   Video as VideoIcon,

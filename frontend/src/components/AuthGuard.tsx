@@ -5,9 +5,11 @@ import { useAuthStore } from '../store/authStore';
 interface AuthGuardProps {
   requiredRole?: string;
   requiredPermission?: string;
+  allowedRoles?: string[];
+  children?: React.ReactNode;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ requiredRole, requiredPermission }) => {
+const AuthGuard: React.FC<AuthGuardProps> = ({ requiredRole, requiredPermission, allowedRoles, children }) => {
   const { isAuthenticated, user, fetchMe, loading } = useAuthStore();
 
   useEffect(() => {
@@ -31,8 +33,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ requiredRole, requiredPermission 
     );
   }
 
-  // Check roles if required
+  // Check single role if required
   if (requiredRole && user && user.role?.name !== 'Superadmin' && user.role?.name !== requiredRole) {
+    return <Navigate to="/403" replace />;
+  }
+
+  // Check multiple allowed roles if required
+  if (allowedRoles && user && user.role?.name !== 'Superadmin' && !allowedRoles.includes(user.role?.name || '')) {
     return <Navigate to="/403" replace />;
   }
 
@@ -45,7 +52,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ requiredRole, requiredPermission 
     }
   }
 
-  return <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default AuthGuard;

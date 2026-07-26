@@ -16,8 +16,7 @@ import {
   LogOut, 
   User as UserIcon,
   Search,
-  CheckCircle,
-  ExternalLink
+  CheckCircle
 } from 'lucide-react';
 
 interface SuratKeluar {
